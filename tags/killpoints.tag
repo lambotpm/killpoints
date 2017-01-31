@@ -48,7 +48,7 @@
           message = "You should have received " + amount + " legendaries so far.";
         }
 
-        message += "Your next legendary should be in fewer than " + numWeeks + " weeks.";
+        message += " Your next legendary should be in fewer than " + numWeeks + " weeks.";
       }
 
       return message;
