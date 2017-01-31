@@ -23,7 +23,7 @@ function calculate(region, realm, character, callback) {
     headers: {
       'Access-Control-Allow-Origin': '*'
     }
-	}).then(function(response) {
+  }).then(function(response) {
     if (response.ok) {
       return response.json();
     } else {
@@ -32,7 +32,8 @@ function calculate(region, realm, character, callback) {
   }).then(function(json) {
     callback({
       'name': json.name,
-      'killpoints': getKillpoints(json)
+      'killpoints': getKillpoints(json),
+      'weeklyPoints': getWeeklyPoints(json)
     });
   }).catch(function(error) {
     riot.mount('#killpoints', 'error', { message: error });
@@ -40,7 +41,15 @@ function calculate(region, realm, character, callback) {
 }
 
 function getKillpoints(json) {
-  return Math.round(getDailyKillpoints(json.achievements) + getWeeklyChestKillpoints(json.achievements) + getMythicPlusKillpoints(json.achievements) + getRaidKillpoints(json.progression.raids));
+  return Math.round(getDailyKillpoints(json.achievements) +
+                    getWeeklyChestKillpoints(json.achievements) +
+                    getMythicPlusKillpoints(json.achievements) +
+                    getRaidKillpoints(json.progression.raids));
+}
+
+function getWeeklyPoints(json) {
+
+
 }
 
 function getDailyKillpoints(achievements) {
