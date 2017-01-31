@@ -24,7 +24,7 @@
   <script>
     this.killpoints = opts.killpoints;
     this.weeklyPoints = opts.weeklyPoints;
-    this.breakpoints = [194, 578, 1225, 2181, 4800, 9600];
+    this.breakpoints = [194, 772, 1997, 4178, 8978];
 
     estimate(killpoints, weeklyPoints) {
       var message;
