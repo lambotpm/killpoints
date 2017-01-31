@@ -23,7 +23,7 @@ function calculate(region, realm, character, callback) {
     headers: {
       'Access-Control-Allow-Origin': '*'
     }
-	}).then(function(response) {
+  }).then(function(response) {
     if (response.ok) {
       return response.json();
     } else {
@@ -32,7 +32,8 @@ function calculate(region, realm, character, callback) {
   }).then(function(json) {
     callback({
       'name': json.name,
-      'killpoints': getKillpoints(json)
+      'killpoints': getKillpoints(json),
+      'weeklyPoints': getWeeklyPoints(json)
     });
   }).catch(function(error) {
     riot.mount('#killpoints', 'error', { message: error });
@@ -40,7 +41,31 @@ function calculate(region, realm, character, callback) {
 }
 
 function getKillpoints(json) {
-  return Math.round(getDailyKillpoints(json.achievements) + getWeeklyChestKillpoints(json.achievements) + getMythicPlusKillpoints(json.achievements) + getRaidKillpoints(json.progression.raids));
+  return Math.round(getDailyKillpoints(json.achievements) +
+                    getWeeklyChestKillpoints(json.achievements) +
+                    getMythicPlusKillpoints(json.achievements) +
+                    getRaidKillpoints(json.progression.raids));
+}
+
+function getWeeklyPoints(json) {
+  var weeklyPoints = 0;
+
+  if(getDailyKillpoints(json.achievements) > 0) {
+    weeklyPoints += 7 * FACTORS.emissary;
+  }
+
+  if(getWeeklyChestKillpoints(json.achievements) > 0) {
+    weeklyPoints += FACTORS.mPlusChest;
+  }
+
+  var mPlusPoints = getMythicPlusKillpoints(json.achievements);
+  if(mPlusPoints > 0) {
+    weeklyPoints += mPlusPoints / weeklyChests;
+  }
+
+  weeklyPoints += weeklyRaidKillFactor;
+
+  return Math.round(weeklyPoints);
 }
 
 function getDailyKillpoints(achievements) {
@@ -51,7 +76,7 @@ function getDailyKillpoints(achievements) {
   if (index >= 0) {
     var days110 = moment(new Date()).diff(achievements.achievementsCompletedTimestamp[index], 'days');
 
-    killpoints += days110 * 2;
+    killpoints += days110 * FACTORS.emissary;
   }
 
   return killpoints;
@@ -63,9 +88,9 @@ function getWeeklyChestKillpoints(achievements) {
   var index = achievements.achievementsCompleted.indexOf(10671);
 
   if (index >= 0) {
-    var weeklyChests = moment().diff(moment.max(CHEST_AVAILABLE, moment(achievements.achievementsCompletedTimestamp[index])), 'weeks');
+    weeklyChests = moment().diff(moment.max(CHEST_AVAILABLE, moment(achievements.achievementsCompletedTimestamp[index])), 'weeks');
 
-    killpoints += weeklyChests * 11;
+    killpoints += weeklyChests * FACTORS.mPlusChest;
   }
 
   return killpoints;
@@ -77,7 +102,7 @@ function getMythicPlusKillpoints(achievements) {
   KEYSTONES.forEach(function(keystone) {
     var index = achievements.criteria.indexOf(keystone);
 
-    killpoints += (index < 0) ? 0 : achievements.criteriaQuantity[index] * 3.5;
+    killpoints += (index < 0) ? 0 : achievements.criteriaQuantity[index] * FACTORS.mPlus;
   });
 
   return killpoints;
@@ -89,16 +114,21 @@ function getRaidKillpoints(raids) {
   raids.forEach(function(raid) {
     if (RAIDS.hasOwnProperty(raid.id)) {
       raid.bosses.forEach(function(boss) {
-        killpoints += boss.lfrKills * 2;
-        killpoints += boss.normalKills * 3;
-        killpoints += boss.heroicKills * 4;
-        killpoints += boss.mythicKills * 6;
+        killpoints += boss.lfrKills * FACTORS.lfrKills;
+        killpoints += boss.normalKills * FACTORS.normalKills;
+        killpoints += boss.heroicKills * FACTORS.heroicKills;
+        killpoints += boss.mythicKills * FACTORS.mythicKills;
       });
     }
   });
 
+  weeklyRaidKillFactor = killpoints/weeklyChests;
+
   return killpoints;
 }
+
+var weeklyChests = 0;
+var weeklyRaidKillFactor = 0;
 
 const API_KEY = api_key;
 
@@ -115,4 +145,14 @@ const RAIDS = {
   8440: 'Trial of Valor',
   8025: 'Nighthold',
   8026: 'Emerald Nightmare'
+};
+
+const FACTORS = {
+  emissary: 2,
+  mPlusChest: 11,
+  mPlus: 3.5,
+  lfrKills: 2,
+  normalKills: 3,
+  heroicKills: 4,
+  mythicKills: 6
 };

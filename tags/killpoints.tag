@@ -1,9 +1,9 @@
 <killpoints>
   <div class="card mt-1">
     <div class="card-block">
-      <p class="card-text text-center killpoints">{ opts.name } has <strong>{ opts.killpoints}</strong> killpoints.</p>
+      <p class="card-text text-center killpoints">{ opts.name } has <strong>{ opts.killpoints }</strong> killpoints.</p>
 
-      <p class="card-text text-center">{ estimate(opts.killpoints) }</p>
+      <p class="card-text text-center">{ estimate(opts.killpoints, opts.weeklyPoints) }</p>
       <table class="table table-sm">
         <thead>
           <tr>
@@ -23,9 +23,10 @@
   </div>
   <script>
     this.killpoints = opts.killpoints;
-    this.breakpoints = [194, 578, 1225, 2181, 4800, 9600];
+    this.weeklyPoints = opts.weeklyPoints;
+    this.breakpoints = [194, 772, 1997, 4178, 8978];
 
-    estimate(killpoints) {
+    estimate(killpoints, weeklyPoints) {
       var message;
 
       if (killpoints > this.breakpoints[this.breakpoints.length - 1]) {
@@ -35,6 +36,10 @@
           return breakpoint > killpoints;
         });
 
+        var threshhold = this.breakpoints[amount] - killpoints;
+        var numWeeks = Math.round(threshhold / this.weeklyPoints); 
+
+
         if (amount == 0) {
           message = "Keep going! Your first legendary will be quick!";
         } else if (amount == 1) {
@@ -42,6 +47,8 @@
         } else {
           message = "You should have received " + amount + " legendaries so far.";
         }
+
+        message += " Your next legendary should be in fewer than " + numWeeks + " weeks.";
       }
 
       return message;
