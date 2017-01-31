@@ -100,7 +100,7 @@ function getRaidKillpoints(raids) {
   return killpoints;
 }
 
-const API_KEY = 'kr2bfgpv5wtx5entzwkvvq6kqpwfwg7e';
+const API_KEY = api_key;
 
 const CHEST_AVAILABLE = moment('2016-09-21');
 
