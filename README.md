@@ -15,3 +15,9 @@ Built with [riotjs](http://riotjs.com/). This site calculates killpoints for cha
 > My killpoints aren't showing, i keep seeing the spinner.
 
   Please do not use Internet Explorer.
+
+## Credits
+
+Added use of the window.fetch JavaScript polyfill from [github](https://github.com/github/fetch) for use with Safari on both macOS and iOS.
+
+Project originally written by [@rsuurd](https://github.com/rsuurd). I've just made some minor improvements and bug fixes.
